@@ -322,7 +322,7 @@ para = {
 }
 
 if __name__ == '__main__':
-	raw_data, label_data = data_loader.hdfs_data_loader(para)
-	r = mi.estimate_invar_spce(para, raw_data)
-	invar_dict = mi.invariant_search(para, raw_data, r)
-	mi.evaluate(raw_data, invar_dict, label_data)
+	raw_data, label_data = hdfs_data_loader(para)
+	r = estimate_invar_spce(para, raw_data)
+	invar_dict = invariant_search(para, raw_data, r)
+	evaluate(raw_data, invar_dict, label_data)
