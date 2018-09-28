@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'Shilin He'
 
+
+import pandas as pd
 import numpy as np
 from itertools import combinations
 
