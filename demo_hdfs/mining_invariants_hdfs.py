@@ -4,7 +4,6 @@ __author__ = 'Shilin He'
 
 import numpy as np
 from itertools import combinations
-import utils.evaluation as ev
 
 def estimate_invar_spce(para, event_count_matrix):
 	""" Estimate the Invariant Space using SVD decomposition, return the invariant space size r (integer)
@@ -279,7 +278,7 @@ def evaluate(event_count_matrix, invar_dict, groundtruth_labels):
 		prediction.append(label)
 
 	assert len(groundtruth_labels) == len(prediction)
-	ev.evaluate(groundtruth_labels, prediction)
+	evaluate(groundtruth_labels, prediction)
 
 def hdfs_data_loader(para):
 	""" load the log sequence matrix and labels from the file path.
