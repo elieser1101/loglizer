@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'Shilin He'
 
-from models import mining_invariants as mi
 import numpy as np
 from itertools import combinations
 import utils.evaluation as ev
