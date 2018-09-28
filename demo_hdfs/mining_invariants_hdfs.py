@@ -277,10 +277,12 @@ def evaluate(event_count_matrix, invar_dict, groundtruth_labels):
 			if sum_of_invar != 0:
 				label = 1
 				break
+		print(label)
 		prediction.append(label)
+	print(prediction)
 
-	assert len(groundtruth_labels) == len(prediction)
-	evaluate(groundtruth_labels, prediction)
+	#assert len(groundtruth_labels) == len(prediction)
+	#evaluate(groundtruth_labels, prediction)
 
 def hdfs_data_loader(para):
 	""" load the log sequence matrix and labels from the file path.
@@ -307,7 +309,7 @@ def hdfs_data_loader(para):
 	label_df = pd.read_csv(label_path, delimiter=r'\s+', header=None, usecols = [0], dtype =int) # usecols must be a list
 	label_data = label_df.as_matrix()
 	print("The raw data shape is {} and label shape is {}".format(raw_data.shape, label_data.shape))
-	assert raw_data.shape[0] == label_data.shape[0]
+	#assert raw_data.shape[0] == label_data.shape[0]
 	print('The number of anomaly instances is %d' % sum(label_data))
 	return raw_data, label_data
 
@@ -325,4 +327,4 @@ if __name__ == '__main__':
 	raw_data, label_data = hdfs_data_loader(para)
 	r = estimate_invar_spce(para, raw_data)
 	invar_dict = invariant_search(para, raw_data, r)
-	evaluate(raw_data, invar_dict, label_data)
+	evaluate(raw_data, invar_dict, None)
