@@ -2,8 +2,36 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'Shilin He'
 
-from utils import data_loader as data_loader
 from models import mining_invariants as mi
+
+def hdfs_data_loader(para):
+	""" load the log sequence matrix and labels from the file path.
+
+	Args:
+	--------
+	para: the parameters dictionary
+
+	Returns:
+	--------
+	raw_data:  log sequences matrix
+	label_data: labels matrix
+	"""
+	file_path = para['path'] + para['log_seq_file_name']
+	label_path = para['path'] + para['label_file_name']
+	# load log sequence matrix
+	pre_df = pd.read_csv(file_path, nrows=1, header=None, delimiter=r'\s+')
+	columns = pre_df.columns.tolist()
+	# remove the last column of block name
+	use_cols = columns[:-1]
+	data_df = pd.read_csv(file_path, delimiter=r'\s+', header=None, usecols =use_cols, dtype =int)
+	raw_data = data_df.as_matrix()
+	# load lables
+	label_df = pd.read_csv(label_path, delimiter=r'\s+', header=None, usecols = [0], dtype =int) # usecols must be a list
+	label_data = label_df.as_matrix()
+	print("The raw data shape is {} and label shape is {}".format(raw_data.shape, label_data.shape))
+	assert raw_data.shape[0] == label_data.shape[0]
+	print('The number of anomaly instances is %d' % sum(label_data))
+	return raw_data, label_data
 
 para = {
 'path':'/logalizardata/Data/SOSP_data/',        # directory for input data
