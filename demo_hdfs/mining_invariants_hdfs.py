@@ -7,6 +7,21 @@ import pandas as pd
 import numpy as np
 from itertools import combinations
 
+def evaluatemeasures(testing_labels, prediction):
+	""" evaluation with precision, recall, and f1-measure.
+
+	Args:
+	--------
+	testing_labels: labels of testing data
+	prediction: predicted labels of a model
+
+	Returns:
+	--------
+	"""
+	precision, recall, f1_score, _ = np.array(list(precision_recall_fscore_support(testing_labels, prediction)))[:, 1]
+	print('=' * 20, 'RESULT', '=' * 20)
+	print("Precision:  %.6f, Recall: %.6f, F1_score: %.6f" % (precision, recall, f1_score))
+
 def estimate_invar_spce(para, event_count_matrix):
 	""" Estimate the Invariant Space using SVD decomposition, return the invariant space size r (integer)
 
@@ -280,7 +295,7 @@ def evaluate(event_count_matrix, invar_dict, groundtruth_labels):
 		prediction.append(label)
 
 	assert len(groundtruth_labels) == len(prediction)
-	evaluate(groundtruth_labels, prediction)
+	evaluatemeasures(groundtruth_labels, prediction)
 
 def hdfs_data_loader(para):
 	""" load the log sequence matrix and labels from the file path.
