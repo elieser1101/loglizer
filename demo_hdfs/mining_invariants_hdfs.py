@@ -6,6 +6,9 @@ __author__ = 'Shilin He'
 import pandas as pd
 import numpy as np
 from itertools import combinations
+from sklearn.metrics import precision_recall_fscore_support
+import numpy as np
+from sklearn.model_selection import cross_validate
 
 def evaluatemeasures(testing_labels, prediction):
 	""" evaluation with precision, recall, and f1-measure.
