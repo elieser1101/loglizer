@@ -1,0 +1,3 @@
+[submodule "logparser"]
+	path = logparser
+	url = git@github.com:elieser1101/logparser.git
