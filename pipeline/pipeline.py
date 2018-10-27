@@ -18,11 +18,12 @@ class Parser:
     #ouput_dir = donde se guardara el resultado del parsing
     #log_file = nombre del log
     #regex = regex que utilizara el parser, #TODO:deberia ser parametro de la clase??o solo del metodo que se implemente??
-    def __init__(self, algorithm, input_dir, output_dir, log_file, regex=None):
+    def __init__(self, algorithm, input_dir, output_dir, log_file, log_format, regex=None):
         self.algorithm = algorithm
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.log_file = log_file
+        self.log_format = log_format
         self.regex = regex
     def execute(self, *args):  # ver como es que se define el excute por default para ejecutar directamente de instancia de la clase
         if self.algorithm == 'drain':
