@@ -128,10 +128,19 @@ class Pipeline:
         #TODO:es necesario cargarle estos atributos a pipeline o simplemente se los paso a la calse que instancia??
         self.log_analizer_algorithm = log_analizer_algorithm
         self.data_type = data_type
-        self.input_dir = parser_output_dir#TODO: aqui deberia ser el output del featur extractor
+        self.loglizer_input_dir = parser_output_dir#TODO: aqui deberia ser el output del featur extractor
         self.log_seq = log_file
-        self.log_analizer = Loglizer(log_analizer_algorithm, data_type, input_dir, self.log_seq)
+        self.log_analizer = Loglizer(log_analizer_algorithm, data_type, self.loglizer_input_dir, self.log_seq)
 
     def execute(self, *args):#TODO:creo que solo funciona con los casos default del parser, pq si le paso algo rompera lo que recibe el log_analizer
         self.parser.execute()
         self.log_analizer.execute(args)
+
+    def get_new_parser(self):
+        self.parser = Parser(self.parser_algorithm, self.input_dir, self.parser_output_dir,
+                             self.log_file, self.parser_regex)  # TODO:que prodria pasr si tenemos varios parser a la vez?
+
+    def get_new_loglizer(self):
+        self.log_analizer = Loglizer(self.log_analizer_algorithm, self.data_type,
+                                     self.loglizer_input_dir, self.log_seq)
+
