@@ -77,6 +77,76 @@ class Parser:
         parser = LenMa.LogParser(self.input_dir, self.output_dir, self.log_format, threshold=threshold, rex=regex)
         parser.parse(self.log_file)
 
+#input_algorithm: el algoritmo que se utilizo para hacer el parsing.
+#framing_technique: tecnica para seleccionar eventos contenido en un event count vector(window, sliding, events).
+#input_dir: ruta a los archivos input (Ruta absoluta).
+#structured_data: nombre del archivo que contiene los logs originales de manera estructurada.
+#events_file: lista de los eventos identificados por el parser.
+#output_dir: ruta del directorio donde se guadara el resultado de event cout matrix (Ruta absoluta).
+#output_file_name: nombre del archivo que contiene el event count matrix.
+
+    class FeatureExtractor:
+      def __init__(self, input_algorithm, framing_technique, input_dir, structured_data, events_file,
+                  output_dir, output_file_name):
+        self.input_algorithm = input_algorithm
+        self.framing_technique = framing_technique
+        self.input_dir = input_dir
+        self.structured_data = structured_data
+        self.events_file = events_file
+        self.output_dir = output_dir
+        self.output_file_name = output_file_name
+
+      def execute(*args):
+        #TODO: debo incluir una condicion basado en el input_algorithm?aparentemente todos en dev generan el mismo par de archivos
+        if self.framing_technique == 'fixed_window':
+          self.fixed_window()
+
+      #TODO: Funciona aislado, debe probarse
+      #TODO: este objeto tiene todo las rutas que te indican de donde iniciar el proceso y en donde dejar el resultado
+      def fixed_window(self):
+        d = {'JAN':1, 'FEB':2, 'MAR':3, 'APR':4, 'MAY':5, 'JUN':6, 'JUL':7, 'AUG':8, 'SEP':9, 'OCT':10, 'NOV':11, 'DEC':12}
+
+        #Lee el resultado del Log Parser.
+        df = pd.read_csv(self.input_dir + self.structured_data, sep=',')
+        #Transforma meses formato str a formato int.
+        df['IMonth'] = df['IMonth'].str.upper().map(d)
+
+        #Unifica Mes, Día y Tiempo.
+        df['IDate'] = df[df.columns[1:3]].apply(lambda x: '-'.join(x.dropna().astype(int).astype(str)),axis=1)
+        df['IDate'] = df['IDate'] + " " + df['ITime']
+
+        #Transforma el str en un TimeDelta para poder sacar cuentas.
+        df['IDate'] = pd.to_datetime(df['IDate'].astype(str), format="%m-%d %H:%M:%S")
+
+        #Este dato debe llegar por parámetros (Quizás el indicativo de seconds/minutes/hours/days/etc también).
+        Interval_Time = 60000
+
+        #Hace un sort por timedeltas.
+        df.sort_values('IDate', inplace=True)
+        df = df.reset_index(drop=True)
+
+        InitialFrame = datetime.datetime.strptime(str(df.IDate[df.index[0]]), "%Y-%m-%d %H:%M:%S").timestamp()
+        Accumulator = InitialFrame + Interval_Time
+
+        Total_Sum = ((df.IDate[df.index[-1]].value - df.IDate[df.index[0]].value))
+
+        TimeframeCounter = 0
+
+        for i, row in df.iterrows():
+            ActualDateTimedelta = datetime.datetime.strptime(str(df.loc[i, 'IDate']), "%Y-%m-%d %H:%M:%S").timestamp()
+            if(i == 0):
+               df['Groups'] = TimeframeCounter
+            elif(ActualDateTimedelta <= Accumulator):
+               df.loc[i, 'Groups']= TimeframeCounter
+            else:
+               TimeframeCounter = TimeframeCounter + 1
+               df.loc[i, 'Groups']= TimeframeCounter
+               Accumulator = Accumulator + Interval_Time
+
+        # Arma la matriz de Features contando los logs que hay por EventId en cada TimeFrame.
+        df = df.groupby(by = 'Groups')['EventId'].value_counts().unstack().fillna(0)
+        df.to_csv(self.output_dir + self.output_file_name + '.csv', index=False)
+
 
 # algorithm: algoritmo a utilizar
 # data_type: time_dased, event_based
@@ -143,4 +213,3 @@ class Pipeline:
     def get_new_loglizer(self):
         self.log_analizer = Loglizer(self.log_analizer_algorithm, self.data_type,
                                      self.loglizer_input_dir, self.log_seq)
-
