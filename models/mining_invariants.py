@@ -280,3 +280,57 @@ def evaluate(event_count_matrix, invar_dict, groundtruth_labels):
 
 	assert len(groundtruth_labels) == len(prediction)
 	ev.evaluate(groundtruth_labels, prediction)
+
+
+#TODO:hace casi lo mismo que evaluate, solo que abre los headers y muestra el origigen del error y retorna las predicciones
+#TODO: el archivo de donde saca los header no debe ser hardcode
+def deepia_evaluate(event_count_matrix, invar_dict):
+	""" evaluate the results with mined invariants
+
+	Args:
+	--------
+	event_count_matrix: the input event count matrix
+	invar_dict: the dictionary of invariants
+	groundtruth_labels: the groundtruth labels for evaluation
+
+	Returns:
+	--------
+	"""
+	headers = pd.read_csv('/BGL_result/BGL_2k2.log_templates.csv')
+	headers  # .keys()
+
+	print("the mined {} invariants are: {}".format(len(invar_dict), invar_dict))
+	valid_col_list = []
+	valid_invar_list = []
+	for key in invar_dict:
+		valid_col_list.append(list(key))
+		valid_invar_list.append(list(invar_dict[key]))
+	print(valid_col_list)
+	print(valid_invar_list)
+
+	prediction = []
+	for row_index, row in enumerate(event_count_matrix):
+		label = 0
+		# print('#####')
+		# print('row',row)
+		for i, cols in enumerate(valid_col_list):
+			sum_of_invar = 0
+			# print('cols',cols, valid_invar_list[i])
+			for j, c in enumerate(cols):
+				sum_of_invar += valid_invar_list[i][j] * row[c]
+			# print('col',j, c)
+			# print('mult val', valid_invar_list[i][j], row[c])
+			if sum_of_invar != 0:
+				print('*******8anomaly*****************')
+				print('index, row', row_index, row)
+				print('cols', cols, valid_invar_list[i])
+				# print('eventid',name_index.loc[row_index][0])#TODO:name index esta definido mas adelante
+				print('\n invariant', cols)  # TODO:esto es el invariante, pero que es lo que veo yo como anomaliaA??
+				for j in cols:
+					print('>>>',
+						  headers['EventTemplate'][j])  # TODO:header.keys es el dataframe que se define mas abajo
+				label = 1
+				break
+		prediction.append(label)
+
+	return prediction
