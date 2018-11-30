@@ -162,7 +162,7 @@ class Loglizer:
 
     def execute(self, *args):
         if self.algorithm == 'mining_invariants':
-            self.mining_invariants(*args)
+            return self.mining_invariants(*args)
 
     def create_log_template_map(self, parsed_structure_log_path, id_column_name, result_name_path):
         # creamos el archivo logTemplateMap.csv
