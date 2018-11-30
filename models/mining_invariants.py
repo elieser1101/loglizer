@@ -286,7 +286,7 @@ def evaluate(event_count_matrix, invar_dict, groundtruth_labels):
 
 #TODO:hace casi lo mismo que evaluate, solo que abre los headers y muestra el origigen del error y retorna las predicciones
 #TODO: el archivo de donde saca los header no debe ser hardcode
-def deepia_evaluate(event_count_matrix, invar_dict):
+def deepia_evaluate(event_count_matrix, invar_dict, log_template):
 	""" evaluate the results with mined invariants
 
 	Args:
@@ -298,7 +298,8 @@ def deepia_evaluate(event_count_matrix, invar_dict):
 	Returns:
 	--------
 	"""
-	headers = pd.read_csv('/BGL_result/BGL_2k2.log_templates.csv')
+	print('log template path is ' + log_template)
+	headers = pd.read_csv(log_template)
 	headers  # .keys()
 
 	print("the mined {} invariants are: {}".format(len(invar_dict), invar_dict))
