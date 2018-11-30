@@ -183,13 +183,16 @@ def deepia_data_loader(para):
 	file_path = para['path'] + para['log_file_name']
 	event_mapping_path = para['path'] + para['log_event_mapping']
 	# load data
-	data_df = pd.read_csv(file_path, delimiter=r'\s+', header=None, names = ['time'], usecols = para['select_column']) #, parse_dates = [1], date_parser=dateparse)
+	data_df = pd.read_csv(file_path, delimiter=r'\s+', header=None, names=['month', 'day', 'hour'],
+						  usecols=para['select_column'])  # , parse_dates = [1], date_parser=dateparse)
 	# convert to date time format
-	data_df['time'] = pd.to_datetime(data_df['time'], format="%Y-%m-%d-%H.%M.%S.%f")
+	data_df = data_df[['month', 'day', 'hour']].apply(lambda x: list(map(str, x)))
+	data_df['time'] = data_df[['month', 'day', 'hour']].apply(lambda x: '-'.join(x), axis=1)  #
+	data_df['time'] = pd.to_datetime(data_df['time'], format="%b-%d-%H:%M:%S")
 	# calculate the time interval since the start time
-	data_df['seconds_since'] = (data_df['time']-data_df['time'][0]).dt.total_seconds().astype(int)
+	data_df['seconds_since'] = (data_df['time'] - data_df['time'][0]).dt.total_seconds().astype(int)
 	# get the label for each log
-	#data_df['label'] = (data_df['label'] != '-').astype(int)
+	# data_df['label'] = (data_df['label'] != '-').astype(int)
 	raw_data = data_df[['seconds_since']].as_matrix()
 
 	# load the event mapping list
