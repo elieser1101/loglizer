@@ -281,6 +281,7 @@ def evaluate(event_count_matrix, invar_dict, groundtruth_labels):
 
 	assert len(groundtruth_labels) == len(prediction)
 	ev.evaluate(groundtruth_labels, prediction)
+	return prediction
 
 
 #TODO:hace casi lo mismo que evaluate, solo que abre los headers y muestra el origigen del error y retorna las predicciones

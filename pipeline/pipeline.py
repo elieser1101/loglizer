@@ -168,17 +168,26 @@ class Loglizer:
         print(para)
         if self.data_type == 'time_based':
             para['log_file_name'] = self.log_seq
+            raw_data, event_mapping_data = data_loader.deepia_data_loader(para)
+            event_count_matrix = data_loader.deepia_preprocess_data(para, raw_data, event_mapping_data)
+            r = mi.estimate_invar_spce(para, event_count_matrix)
+            invar_dict = mi.invariant_search(para, event_count_matrix, r)
+            predictions = mi.deepia_evaluate(event_count_matrix, invar_dict)
+        elif self.data_type == 'time_based_bgl':
+            para['log_file_name'] = self.log_seq
             raw_data, event_mapping_data = data_loader.bgl_data_loader(para)
             event_count_matrix, labels = data_loader.bgl_preprocess_data(para, raw_data, event_mapping_data)
             r = mi.estimate_invar_spce(para, event_count_matrix)
             invar_dict = mi.invariant_search(para, event_count_matrix, r)
-            mi.evaluate(event_count_matrix, invar_dict, labels)
+            predictions = mi.evaluate(event_count_matrix, invar_dict, labels)
         elif self.data_type == 'event_based':
             para['log_seq_file_name'] = self.log_seq
             raw_data, label_data = data_loader.hdfs_data_loader(para)
             r = mi.estimate_invar_spce(para, raw_data)
             invar_dict = mi.invariant_search(para, raw_data, r)
-            mi.evaluate(raw_data, invar_dict, label_data)
+            predictions = mi.evaluate(raw_data, invar_dict, label_data)
+
+        return raw_data, event_mapping_data, event_count_matrix, r, invar_dict, predictions
 
 
 class Pipeline:
