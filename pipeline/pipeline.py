@@ -3,6 +3,8 @@
 __author__ = 'Elieser Pereira'
 
 #parser algoritmhs import
+import pandas as pd
+import datetime
 from logparser.logparser.Drain import Drain
 from logparser.logparser.LogSig import LogSig
 from logparser.logparser.LenMa import LenMa
@@ -96,7 +98,7 @@ class Parser:
         self.output_dir = output_dir
         self.output_file_name = output_file_name
 
-      def execute(*args):
+      def execute(self, *args):
         #TODO: debo incluir una condicion basado en el input_algorithm?aparentemente todos en dev generan el mismo par de archivos
         if self.framing_technique == 'fixed_window':
           self.fixed_window()
@@ -161,6 +163,24 @@ class Loglizer:
     def execute(self, *args):
         if self.algorithm == 'mining_invariants':
             self.mining_invariants(*args)
+
+    def create_log_template_map(self, parsed_structure_log_path, id_column_name, result_name_path):
+        # creamos el archivo logTemplateMap.csv
+        # el event id debe ser el id que genera el parser o un indice???
+        strucred_log_df = pd.read_csv(parsed_structure_log_path)
+        # strucred_log_df = pd.read_csv('/BGL_result/2k_de_bgl_completo.log_structured.csv')
+
+        event_ids_col = strucred_log_df[id_column_name]
+        aux_dict = dict()
+        for i in event_ids_col.unique():
+            if i not in aux_dict.keys():
+                aux_dict[i] = len(aux_dict)
+        # la linea sigueiente deja un enterocomo id
+        event_ids_col_int = event_ids_col.map(lambda x: aux_dict[x])
+        # esta deja el id del parser
+        # event_ids_col_int = event_ids_col.map(lambda x: x)
+        event_ids_col_int.to_csv(result_name_path, index=False)
+        return aux_dict
 
     #TODO: como manejo que este metodo recibe un dict??????
     def mining_invariants(self, para):
