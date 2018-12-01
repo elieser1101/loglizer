@@ -6,28 +6,19 @@ from pipeline import Pipeline
 os.chdir('/loglizer')
 sys.path.append('/loglizer')#drain __init__.py
 PYTHONPATH= '/loglizer'
-# ro1 = open("/rocore1.log")
-# ro2 = open("/rocore2.log")
-#
-# print(ro1.read())
-# print('******')
-# print(ro2.read())
-
-# os.rename("/rocore2.log", "/dayco_log.log")
 
 
-# file = open('/dayco_log.log', 'r')
-# lines = file.readlines()
-# file.close()
-# file = open('/dayco_log.log', 'a')
-# file.write(lines[-1][:-1])
-# file.close()
-# file = open('/dayco_log.log', 'r')
-# lines = file.readlines()
-# file.close()
 
-# print(len(lines))
-# print(lines[-2:])
+
+file = open('/dayco_log.log', 'r')
+lines = file.readlines()
+file.close()
+file = open('/dayco_log.log', 'a')
+file.write(lines[-1][:-1])
+file.close()
+file = open('/dayco_log.log', 'r')
+lines = file.readlines()
+file.close()
 
 input_dir  = '/'  # The input directory of log file
 output_dir = '/'  # The output directory of parsing results

@@ -1,0 +1,30 @@
+EventId,EventTemplate,Occurrences
+a045b899,Login Success [user: <*> [Source: <*> [localport: 22] at <*> CCS <*> Oct <*> 2018,50
+58db6296,"(exec timer expired, tty <*> <*> user <*>",25
+d51a3518,User <*> has exited tty session <*>,50
+ef34edd1,Big chunk pool request (348) for community. Replenishing with malloc,1
+c0779844,EIGRP-IPv4 2016: Neighbor 172.30.2.1 (GigabitEthernet3/8.3020) is down: holding time expired,7
+4e4579fe,EIGRP-IPv4 2016: Neighbor 172.30.2.1 (GigabitEthernet3/8.3020) is up: new adjacency,7
+c1070d65,Configured from console by admer on <*> (200.74.215.2),4
+48e2b696,"Netflow TCAM threshold exceeded, TCAM Utilization <*>",2
+848a25c6,received from neighbor 200.16.71.1 6/6 (Other Configuration Change) 0 bytes,1
+29709cb4,Neighbor <*> reset (BGP Notification <*>,12
+65c8b8ad,neighbor <*> Down BGP Notification <*>,12
+79849eca,neighbor <*> IPv4 Unicast topology base removed from session BGP Notification <*>,13
+9fc2ddbe,neighbor <*> Up,16
+5a96e436,Threshold: Total CPU Utilization(Total/Intr): <*> Top 3 processes(Pid/Util): <*> <*> <*>,2
+5c64e1bd,Threshold: Total CPU Utilization(Total/Intr) <*>,2
+963ff902,Neighbor 190.52.105.93 reset (Interface flap),2
+60956952,neighbor 190.52.105.93 Down Interface flap,2
+c2f368fd,neighbor 190.52.105.93 IPv4 Unicast topology base removed from session Interface flap,2
+86be74c9,Neighbor 190.52.105.93 passive reset (Peer closed the session),1
+ed456fbc,neighbor 190.52.105.93 passive Down AFI/SAFI not supported,1
+59f2bd50,sent to neighbor <*> 4/0 (hold time expired) 0 bytes,10
+2d65cebf,Neighbor <*> reset (Peer closed the session),2
+1bd6115a,neighbor <*> Down Peer closed the session,2
+50c313a2,neighbor <*> IPv4 Unicast topology base removed from session Peer closed the session,2
+cbe726da,received from neighbor 172.30.2.1 active 6/0 (CEASE: unknown subcode) 0 bytes,1
+b9cdbb40,Neighbor 172.30.2.1 active reset (BGP Notification <*>,2
+15ecc80d,neighbor 172.30.2.1 active Down BGP Notification received,1
+9943c585,received from neighbor 190.52.105.93 6/3 (Peer De-configured) 0 bytes,1
+02d9f188,Login failed [user: ] [Source: 200.74.215.2] [localport: 22] [Reason: Login Authentication Failed] at 10:05:48 CCS Tue Oct 16 2018,1
