@@ -256,6 +256,11 @@ class Pipeline:
         self.log_seq = log_file
         self.log_analizer = Loglizer(log_analizer_algorithm, data_type, self.loglizer_input_dir, self.log_seq)
 
+        self.event_count_matrix = None
+        self.invar_dict = None
+        self.predictions = None
+        self.anomalies = None
+
     def execute(self, *args):#TODO:creo que solo funciona con los casos default del parser, pq si le paso algo rompera lo que recibe el log_analizer
         self.parser.execute()
         self.log_analizer.execute(args)
@@ -267,3 +272,14 @@ class Pipeline:
     def get_new_loglizer(self):
         self.log_analizer = Loglizer(self.log_analizer_algorithm, self.data_type,
                                      self.loglizer_input_dir, self.log_seq)
+
+    def initial_go(self, para):
+        self.parser.execute()
+        structured_log_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.log_structured.csv'
+        log_template_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.logTemplateMap.csv'
+        #TODO: si cmabio el parser, ya no seria mas evntId?
+        self.log_analizer.create_log_template_map(structured_log_path, 'EventId',
+                                                                 log_template_path)
+        self.event_count_matrix = self.log_analizer.get_event_count_matrix(para)
+        self.invar_dict = self.log_analizer.find_invariants(para, self.event_count_matrix)
+        self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
