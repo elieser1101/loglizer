@@ -278,23 +278,37 @@ class Pipeline:
         file.close()
         return len(lines)
 
-    def initial_go(self, para):
+    def parse_file(self):
         log_name_path = self.parser.input_dir + self.parser.log_file
         self.last_log_lines_len = self.get_file_lines_len(log_name_path)
         self.parser.execute()
+
+    def create_file_map(self):
         structured_log_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.log_structured.csv'
         log_template_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.logTemplateMap.csv'
         #TODO: si cmabio el parser, ya no seria mas evntId?
         self.log_analizer.create_log_template_map(structured_log_path, 'EventId',
-                                                                 log_template_path)
+                                                  log_template_path)
+
+    def initial_go(self, para):
+        self.parse_file()
+        self.create_file_map()
         self.event_count_matrix = self.log_analizer.get_event_count_matrix(para)
         self.invar_dict = self.log_analizer.find_invariants(para, self.event_count_matrix)
         self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
 
-    def validate_change(self, para):
+    def validate_change(self):
         log_name_path = self.parser.input_dir + self.parser.log_file
         current_log_lines_len = self.get_file_lines_len(log_name_path)
         print('old, new', self.last_log_lines_len,current_log_lines_len)
-        if current_log_lines_len - self.last_log_lines_len > 0:
-            print('inica proceso de actulizar parainferencia')
+        return current_log_lines_len - self.last_log_lines_len > 0
+
+    #TODO:esto debe correr cada cierto tiempo o cad que llege un numero de logs
+    #primeramente se corre a mano para validar que funciona la logica
+    def deepslash(self, para):
+        if self.validate_change():
+            self.parse_file()
+            self.create_file_map()
+            self.event_count_matrix = self.log_analizer.get_event_count_matrix(para)
+            self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
 
