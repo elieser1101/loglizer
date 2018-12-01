@@ -295,10 +295,20 @@ class Pipeline:
         if delete_memory:
             sliding_file_path = para['save_path']+'sliding_'+str(para['window_size'])+'h_'+str(para['step_size'])+'h.csv'
             os.remove(sliding_file_path)
-        return self.log_analizer.get_event_count_matrix(para)
+        self.event_count_matrix =  self.log_analizer.get_event_count_matrix(para)
+        return self.event_count_matrix
 
     def find_invariants(self, para):
-        return self.log_analizer.find_invariants(para, self.event_count_matrix)
+        self.invar_dict =  self.log_analizer.find_invariants(para, self.event_count_matrix)
+        return self.invar_dict
+
+    def get_anomalies(self, para):
+        self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
+        return self.predictions, self.anomalies
+    def parse_and_extract_features(self, para, delete_window_memmory=False):
+        self.parse_file()
+        self.create_file_map()
+        self.event_count_matrix = self.get_event_count_matrix(para, delete_window_memmory)
 
     def initial_go(self, para):
         self.parse_file()
@@ -317,8 +327,6 @@ class Pipeline:
     #primeramente se corre a mano para validar que funciona la logica
     def deepslash(self, para):
         if self.validate_change():
-            self.parse_file()
-            self.create_file_map()
-            self.event_count_matrix = self.get_event_count_matrix(para, True)
-            self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
+            self.parse_and_extract_features(para, True)
+            self.predictions, self.anomalies = self.get_anomalies(para)
 
