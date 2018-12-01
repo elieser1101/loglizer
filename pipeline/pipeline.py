@@ -279,7 +279,7 @@ class Pipeline:
         return len(lines)
 
     def initial_go(self, para):
-        log_name_path = self.parser.self.input_dir+self.log_file
+        log_name_path = self.parser.input_dir + self.parser.log_file
         self.last_log_lines_len = self.get_file_lines_len(log_name_path)
         self.parser.execute()
         structured_log_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.log_structured.csv'
@@ -292,8 +292,9 @@ class Pipeline:
         self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
 
     def validate_change(self, para):
-        log_name_path = self.parser.self.input_dir+self.log_file
+        log_name_path = self.parser.input_dir + self.parser.log_file
         current_log_lines_len = self.get_file_lines_len(log_name_path)
+        print('old, new', self.last_log_lines_len,current_log_lines_len)
         if current_log_lines_len - self.last_log_lines_len > 0:
             print('inica proceso de actulizar parainferencia')
 
