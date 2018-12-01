@@ -295,6 +295,11 @@ class AnomalyEvent:
 		self.start_window_index = start_window_index
 		self.end_window_index = end_window_index
 		self.matching_log_list = matching_log_list
+		self.log_lines_list = list()
+		if len(self.matching_log_list):
+			self.log_lines_list = [i.split(' ')[0] for i in self.matching_log_list]
+
+
 
 
 class AnomalyRow:
