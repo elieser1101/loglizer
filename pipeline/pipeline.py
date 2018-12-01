@@ -193,7 +193,9 @@ class Loglizer:
             r = mi.estimate_invar_spce(para, event_count_matrix)
             invar_dict = mi.invariant_search(para, event_count_matrix, r)
             log_template_path = self.input_dir + self.log_seq.split('.log')[0] + '.log_templates.csv'
-            predictions = mi.deepia_evaluate(event_count_matrix, invar_dict, log_template_path)
+            structured_log_path = self.input_dir + self.log_seq.split('.log')[0] + '.log_structured.csv'
+            window_split_file_path = para['save_path']+'sliding_'+str(para['window_size'])+'h_'+str(para['step_size'])+'h.csv'
+            predictions = mi.deepia_evaluate(event_count_matrix, invar_dict, log_template_path, structured_log_path, window_split_file_path)
         elif self.data_type == 'time_based_bgl':
             para['log_file_name'] = self.log_seq
             raw_data, event_mapping_data = data_loader.bgl_data_loader(para)

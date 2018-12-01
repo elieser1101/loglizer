@@ -284,9 +284,26 @@ def evaluate(event_count_matrix, invar_dict, groundtruth_labels):
 	return prediction
 
 
+class AnomalyEvent:
+	def __init__(self, event_template, row_index, row, invar_cols, invariants, start_window_index, end_window_index,
+				 matching_log_list):
+		self.event_template = event_template
+		self.row_index = row_index
+		self.row = row
+		self.invar_cols = invar_cols
+		self.invariants = invariants
+		self.start_window_index = start_window_index
+		self.end_window_index = end_window_index
+		self.matching_log_list = matching_log_list
+
+
+class AnomalyRow:
+	def __init__(self, anomaly_events):
+		self.anomaly_events = anomaly_events
+
 #TODO:hace casi lo mismo que evaluate, solo que abre los headers y muestra el origigen del error y retorna las predicciones
 #TODO: el archivo de donde saca los header no debe ser hardcode
-def deepia_evaluate(event_count_matrix, invar_dict, log_template):
+def deepia_evaluate(event_count_matrix, invar_dict, log_template, structured_log_path, window_split_file_path):
 	""" evaluate the results with mined invariants
 
 	Args:
@@ -301,6 +318,9 @@ def deepia_evaluate(event_count_matrix, invar_dict, log_template):
 	print('log template path is ' + log_template)
 	headers = pd.read_csv(log_template)
 	headers  # .keys()
+	struct_log_df = pd.read_csv(structured_log_path)
+	windows_df = pd.read_csv(window_split_file_path, delimiter=r',',
+							 header=None)  # , parse_dates = [1], date_parser=dateparse)
 
 	print("the mined {} invariants are: {}".format(len(invar_dict), invar_dict))
 	valid_col_list = []
@@ -312,10 +332,12 @@ def deepia_evaluate(event_count_matrix, invar_dict, log_template):
 	print(valid_invar_list)
 
 	prediction = []
+	anomalies_rows = list()
 	for row_index, row in enumerate(event_count_matrix):
 		label = 0
 		# print('#####')
 		# print('row',row)
+		anomaly_events = list()
 		for i, cols in enumerate(valid_col_list):
 			sum_of_invar = 0
 			# print('cols',cols, valid_invar_list[i])
@@ -326,14 +348,35 @@ def deepia_evaluate(event_count_matrix, invar_dict, log_template):
 			if sum_of_invar != 0:
 				print('*******8anomaly*****************')
 				print('index, row', row_index, row)
-				print('cols', cols, valid_invar_list[i])
+				print('cols', cols, valid_invar_list[i])  # cols son las filas de la matriz que definen el invariante
 				# print('eventid',name_index.loc[row_index][0])#TODO:name index esta definido mas adelante
 				print('\n invariant', cols)  # TODO:esto es el invariante, pero que es lo que veo yo como anomaliaA??
 				for j in cols:
+					event_template = headers['EventTemplate'][j]
 					print('>>>',
-						  headers['EventTemplate'][j])  # TODO:header.keys es el dataframe que se define mas abajo
+						  event_template)  # TODO:header.keys es el dataframe que se define mas abajo
+					start_window_index = windows_df.iloc[row_index][0]
+					end_window_index = windows_df.iloc[row_index][1]
+					print('start, end', start_window_index, end_window_index)
+					struct_dataframe_window = struct_log_df[start_window_index:end_window_index]
+					result_matching_events_df = struct_dataframe_window[
+						struct_dataframe_window['EventTemplate'] == event_template]
+					print('len de eventos en window', len(result_matching_events_df))
+					result_matching_events_list = list()
+					if len(result_matching_events_df):
+						result_matching_events_list = result_matching_events_df.to_string(header=False,
+																						  index=False,
+																						  index_names=False).split('\n')
+
+						for log_line in result_matching_events_list:
+							print(log_line)
+					anomaly_event = AnomalyEvent(event_template, row_index, row, cols, valid_invar_list[i],
+												 start_window_index, end_window_index, result_matching_events_list)
+					anomaly_events.append(anomaly_event)
 				label = 1
 				break
 		prediction.append(label)
+		if len(anomaly_events):
+			anomalies_rows.append(AnomalyRow(anomaly_events))
 
-	return prediction
+	return prediction, anomalies_rows
