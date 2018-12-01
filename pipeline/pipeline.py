@@ -195,7 +195,7 @@ class Loglizer:
             log_template_path = self.input_dir + self.log_seq.split('.log')[0] + '.log_templates.csv'
             structured_log_path = self.input_dir + self.log_seq.split('.log')[0] + '.log_structured.csv'
             window_split_file_path = para['save_path']+'sliding_'+str(para['window_size'])+'h_'+str(para['step_size'])+'h.csv'
-            predictions = mi.deepia_evaluate(event_count_matrix, invar_dict, log_template_path, structured_log_path, window_split_file_path)
+            predictions , anomalies= mi.deepia_evaluate(event_count_matrix, invar_dict, log_template_path, structured_log_path, window_split_file_path)
         elif self.data_type == 'time_based_bgl':
             para['log_file_name'] = self.log_seq
             raw_data, event_mapping_data = data_loader.bgl_data_loader(para)
@@ -210,7 +210,7 @@ class Loglizer:
             invar_dict = mi.invariant_search(para, raw_data, r)
             predictions = mi.evaluate(raw_data, invar_dict, label_data)
 
-        return raw_data, event_mapping_data, event_count_matrix, r, invar_dict, predictions
+        return raw_data, event_mapping_data, event_count_matrix, r, invar_dict, predictions, anomalies
 
 
 class Pipeline:
