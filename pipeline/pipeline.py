@@ -299,12 +299,14 @@ class Pipeline:
         return self.event_count_matrix
 
     def find_invariants(self, para):
+        print(self.event_count_matrix.shape)
         self.invar_dict =  self.log_analizer.find_invariants(para, self.event_count_matrix)
         return self.invar_dict
 
     def get_anomalies(self, para):
         self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
         return self.predictions, self.anomalies
+
     def parse_and_extract_features(self, para, delete_window_memmory=False):
         self.parse_file()
         self.create_file_map()
