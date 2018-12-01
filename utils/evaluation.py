@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'Shilin He'
 
+import sys
+sys.path.append('/loglizer')#drain __init__.py
 from sklearn.metrics import precision_recall_fscore_support
 import numpy as np
 from sklearn.model_selection import cross_validate
