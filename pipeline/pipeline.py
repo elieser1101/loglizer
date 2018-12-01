@@ -2,6 +2,16 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'Elieser Pereira'
 
+#parser algoritmhs import
+import pandas as pd
+import os
+import datetime
+from logparser.logparser.Drain import Drain
+from logparser.logparser.LogSig import LogSig
+from logparser.logparser.LenMa import LenMa
+#analizer algorithm imports
+from utils import data_loader as data_loader
+from models import mining_invariants as mi
 
 #TODO: es necesario conocer el log format siempree???como mejoramos esto??
 class Parser:
@@ -250,6 +260,7 @@ class Pipeline:
         self.invar_dict = None
         self.predictions = None
         self.anomalies = None
+        self.last_log_lines_len = None
 
     def execute(self, *args):#TODO:creo que solo funciona con los casos default del parser, pq si le paso algo rompera lo que recibe el log_analizer
         self.parser.execute()
@@ -262,14 +273,62 @@ class Pipeline:
     def get_new_loglizer(self):
         self.log_analizer = Loglizer(self.log_analizer_algorithm, self.data_type,
                                      self.loglizer_input_dir, self.log_seq)
+    def get_file_lines_len(self, file_name):
+        file = open(file_name, 'r')
+        lines = file.readlines()
+        file.close()
+        return len(lines)
 
-    def initial_go(self, para):
+    def parse_file(self):
+        log_name_path = self.parser.input_dir + self.parser.log_file
+        self.last_log_lines_len = self.get_file_lines_len(log_name_path)
         self.parser.execute()
+
+    def create_file_map(self):
         structured_log_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.log_structured.csv'
         log_template_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.logTemplateMap.csv'
         #TODO: si cmabio el parser, ya no seria mas evntId?
         self.log_analizer.create_log_template_map(structured_log_path, 'EventId',
-                                                                 log_template_path)
-        self.event_count_matrix = self.log_analizer.get_event_count_matrix(para)
-        self.invar_dict = self.log_analizer.find_invariants(para, self.event_count_matrix)
+                                                  log_template_path)
+
+    def get_event_count_matrix(self, para, delete_memory=False):
+        if delete_memory:
+            sliding_file_path = para['save_path']+'sliding_'+str(para['window_size'])+'h_'+str(para['step_size'])+'h.csv'
+            os.remove(sliding_file_path)
+        self.event_count_matrix =  self.log_analizer.get_event_count_matrix(para)
+        return self.event_count_matrix
+
+    def find_invariants(self, para):
+        print(self.event_count_matrix.shape)
+        self.invar_dict =  self.log_analizer.find_invariants(para, self.event_count_matrix)
+        return self.invar_dict
+
+    def get_anomalies(self, para):
         self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
+        return self.predictions, self.anomalies
+
+    def parse_and_extract_features(self, para, delete_window_memmory=False):
+        self.parse_file()
+        self.create_file_map()
+        self.event_count_matrix = self.get_event_count_matrix(para, delete_window_memmory)
+
+    def initial_go(self, para):
+        self.parse_file()
+        self.create_file_map()
+        self.event_count_matrix = self.get_event_count_matrix(para)
+        self.invar_dict = self.find_invariants( para)
+        self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
+
+    def validate_change(self):
+        log_name_path = self.parser.input_dir + self.parser.log_file
+        current_log_lines_len = self.get_file_lines_len(log_name_path)
+        print('old, new', self.last_log_lines_len,current_log_lines_len)
+        return current_log_lines_len - self.last_log_lines_len > 0
+
+    #TODO:esto debe correr cada cierto tiempo o cad que llege un numero de logs
+    #primeramente se corre a mano para validar que funciona la logica
+    def deepslash(self, para):
+        if self.validate_change():
+            self.parse_and_extract_features(para, True)
+            self.predictions, self.anomalies = self.get_anomalies(para)
+
