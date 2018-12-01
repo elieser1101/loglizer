@@ -182,6 +182,28 @@ class Loglizer:
         event_ids_col_int.to_csv(result_name_path, index=False)
         return aux_dict
 
+    def get_event_count_matrix(self, para):
+        para['log_file_name'] = self.log_seq
+        raw_data, event_mapping_data = data_loader.deepia_data_loader(para)
+        event_count_matrix = data_loader.deepia_preprocess_data(para, raw_data, event_mapping_data)
+        return event_count_matrix
+
+    def find_invariants(self, para, event_count_matrix):
+        r = mi.estimate_invar_spce(para, event_count_matrix)
+        invar_dict = mi.invariant_search(para, event_count_matrix, r)
+        return invar_dict
+
+    def get_anomalies(self, para, event_count_matrix, invar_dict):
+        log_template_path = self.input_dir + self.log_seq.split('.log')[0] + '.log_templates.csv'
+        structured_log_path = self.input_dir + self.log_seq.split('.log')[0] + '.log_structured.csv'
+        window_split_file_path = para['save_path']+'sliding_'+str(para['window_size'])+'h_'+str(para['step_size'])+'h.csv'
+        predictions , anomalies= mi.deepia_evaluate(event_count_matrix,
+                                                    invar_dict,
+                                                    log_template_path,
+                                                    structured_log_path,
+                                                    window_split_file_path)
+        return predictions, anomalies
+
     #TODO: como manejo que este metodo recibe un dict??????
     def mining_invariants(self, para):
         para['path'] = self.input_dir

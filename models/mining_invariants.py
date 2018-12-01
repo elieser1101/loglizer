@@ -294,6 +294,7 @@ class AnomalyEvent:
 		self.invariants = invariants
 		self.start_window_index = start_window_index
 		self.end_window_index = end_window_index
+		#TODO: en vez de tener la lsita de string podria tener la el pedazo de dataframe que corresponde o es muy caro por espacio?
 		self.matching_log_list = matching_log_list
 		self.log_lines_list = list()
 		if len(self.matching_log_list):
