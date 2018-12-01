@@ -296,11 +296,15 @@ class Pipeline:
             sliding_file_path = para['save_path']+'sliding_'+str(para['window_size'])+'h_'+str(para['step_size'])+'h.csv'
             os.remove(sliding_file_path)
         return self.log_analizer.get_event_count_matrix(para)
+
+    def find_invariants(self, para):
+        return self.log_analizer.find_invariants(para, self.event_count_matrix)
+
     def initial_go(self, para):
         self.parse_file()
         self.create_file_map()
         self.event_count_matrix = self.get_event_count_matrix(para)
-        self.invar_dict = self.log_analizer.find_invariants(para, self.event_count_matrix)
+        self.invar_dict = self.find_invariants( para)
         self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
 
     def validate_change(self):
