@@ -5,7 +5,7 @@ __author__ = 'Elieser Pereira'
 #parser algoritmhs import
 import pandas as pd
 import os
-import datetime
+from datetime import datetime, timedelta
 from logparser.logparser.Drain import Drain
 from logparser.logparser.LogSig import LogSig
 from logparser.logparser.LenMa import LenMa
@@ -127,7 +127,7 @@ class Parser:
         df.sort_values('IDate', inplace=True)
         df = df.reset_index(drop=True)
 
-        InitialFrame = datetime.datetime.strptime(str(df.IDate[df.index[0]]), "%Y-%m-%d %H:%M:%S").timestamp()
+        InitialFrame = datetime.strptime(str(df.IDate[df.index[0]]), "%Y-%m-%d %H:%M:%S").timestamp()
         Accumulator = InitialFrame + Interval_Time
 
         Total_Sum = ((df.IDate[df.index[-1]].value - df.IDate[df.index[0]].value))
@@ -135,7 +135,7 @@ class Parser:
         TimeframeCounter = 0
 
         for i, row in df.iterrows():
-            ActualDateTimedelta = datetime.datetime.strptime(str(df.loc[i, 'IDate']), "%Y-%m-%d %H:%M:%S").timestamp()
+            ActualDateTimedelta = datetime.strptime(str(df.loc[i, 'IDate']), "%Y-%m-%d %H:%M:%S").timestamp()
             if(i == 0):
                df['Groups'] = TimeframeCounter
             elif(ActualDateTimedelta <= Accumulator):
@@ -331,4 +331,24 @@ class Pipeline:
         if self.validate_change():
             self.parse_and_extract_features(para, True)
             self.predictions, self.anomalies = self.get_anomalies(para)
+
+    #TODO:esto debe correr por siempre e ir hablando con elasticsearh en lo diferentes stages
+    #de momento solo correra por un tiemp predefinido y se entrenaran los invariantes  y la inferencia segun los parametros que definamos
+    def run_online(self, para, online_period, invariant_window, inference_window):
+        online_period = timedelta(seconds=online_period)
+        invar_window = timedelta(seconds=invariant_window)
+        inference_window = timedelta(seconds=inference_window)
+        start_time = datetime.now()
+        last_invar_t = las_inference_t = now = datetime.now()
+        while now - start_time < online_period:
+            if now - last_invar_t > invar_window:
+                last_invar_t = now
+                self.invar_dict = self.find_invariants(para)
+                print('calcular invar', now)
+            if now - las_inference_t > inference_window:
+                las_inference_t = now
+                print('hacer inferencia', now, '<<')
+                self.deepslash(para)
+            # print(now)
+            now = datetime.now()
 
