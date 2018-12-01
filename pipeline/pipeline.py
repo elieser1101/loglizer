@@ -294,7 +294,7 @@ class Pipeline:
     def get_event_count_matrix(self, para, delete_memory=False):
         if delete_memory:
             sliding_file_path = para['save_path']+'sliding_'+str(para['window_size'])+'h_'+str(para['step_size'])+'h.csv'
-            os.delete(sliding_file_path)
+            os.remove(sliding_file_path)
         return self.log_analizer.get_event_count_matrix(para)
     def initial_go(self, para):
         self.parse_file()
