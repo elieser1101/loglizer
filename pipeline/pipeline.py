@@ -4,6 +4,7 @@ __author__ = 'Elieser Pereira'
 
 #parser algoritmhs import
 import pandas as pd
+import os
 import datetime
 from logparser.logparser.Drain import Drain
 from logparser.logparser.LogSig import LogSig
@@ -290,10 +291,15 @@ class Pipeline:
         self.log_analizer.create_log_template_map(structured_log_path, 'EventId',
                                                   log_template_path)
 
+    def get_event_count_matrix(self, para, delete_memory=False):
+        if delete_memory:
+            sliding_file_path = para['save_path']+'sliding_'+str(para['window_size'])+'h_'+str(para['step_size'])+'h.csv'
+            os.delete(sliding_file_path)
+        return self.log_analizer.get_event_count_matrix(para)
     def initial_go(self, para):
         self.parse_file()
         self.create_file_map()
-        self.event_count_matrix = self.log_analizer.get_event_count_matrix(para)
+        self.event_count_matrix = self.get_event_count_matrix(para)
         self.invar_dict = self.log_analizer.find_invariants(para, self.event_count_matrix)
         self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
 
@@ -309,6 +315,6 @@ class Pipeline:
         if self.validate_change():
             self.parse_file()
             self.create_file_map()
-            self.event_count_matrix = self.log_analizer.get_event_count_matrix(para)
+            self.event_count_matrix = self.get_event_count_matrix(para, True)
             self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
 
