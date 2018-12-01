@@ -259,6 +259,7 @@ class Pipeline:
         self.invar_dict = None
         self.predictions = None
         self.anomalies = None
+        self.last_log_lines_len = None
 
     def execute(self, *args):#TODO:creo que solo funciona con los casos default del parser, pq si le paso algo rompera lo que recibe el log_analizer
         self.parser.execute()
@@ -271,8 +272,15 @@ class Pipeline:
     def get_new_loglizer(self):
         self.log_analizer = Loglizer(self.log_analizer_algorithm, self.data_type,
                                      self.loglizer_input_dir, self.log_seq)
+    def get_file_lines_len(self, file_name):
+        file = open(file_name, 'r')
+        lines = file.readlines()
+        file.close()
+        return len(lines)
 
     def initial_go(self, para):
+        log_name_path = self.parser.self.input_dir+self.log_file
+        self.last_log_lines_len = self.get_file_lines_len(log_name_path)
         self.parser.execute()
         structured_log_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.log_structured.csv'
         log_template_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.logTemplateMap.csv'
@@ -282,3 +290,10 @@ class Pipeline:
         self.event_count_matrix = self.log_analizer.get_event_count_matrix(para)
         self.invar_dict = self.log_analizer.find_invariants(para, self.event_count_matrix)
         self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
+
+    def validate_change(self, para):
+        log_name_path = self.parser.self.input_dir+self.log_file
+        current_log_lines_len = self.get_file_lines_len(log_name_path)
+        if current_log_lines_len - self.last_log_lines_len > 0:
+            print('inica proceso de actulizar parainferencia')
+
