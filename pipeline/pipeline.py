@@ -329,6 +329,11 @@ class Pipeline:
     #primeramente se corre a mano para validar que funciona la logica
     def deepslash(self, para):
         if self.validate_change():
+            print('####')
+            print('#######')
+            print('#########')
+            print('############')
+            print('logica de inferencia activa, cambio el log')
             self.parse_and_extract_features(para, True)
             self.predictions, self.anomalies = self.get_anomalies(para)
 
@@ -344,6 +349,10 @@ class Pipeline:
             if now - last_invar_t > invar_window:
                 last_invar_t = now
                 self.invar_dict = self.find_invariants(para)
+                print('####')
+                print('#######')
+                print('#########')
+                print('############')
                 print('calcular invar', now)
             if now - las_inference_t > inference_window:
                 las_inference_t = now

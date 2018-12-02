@@ -1,0 +1,23 @@
+correr un cronjob para actualizar log a analizar
+crontab -e
+*/1 * * * * /home/us1/git/mammut-transducer-ktt/lab/env/bin/python /home/us1/git/loglizer/utils/downloader.py
+
+create dockers network:
+docker network create elastic_network --driver=bridge
+
+run elasticsearch docker:
+docker run -d -p 9200:9200 -p 9300:9300 --name elasticsearch --network elastic_network elasticsearch:6.5.1
+
+run kibana docker:
+docker run -d --network elastic_network -e ELASTICSEARCH_URL=http://elasticsearch:9200 -p 5601:5601 kibana:6.5.1
+
+run filebeats docker:
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.5.1-amd64.deb
+sudo dpkg -i filebeat-6.5.1-amd64.deb
+(configurar /etc/filebeat/filebeat.yml para apuntar a los logs que nos interesan)
+sudo service filebeat start
+
+run deepslash instance:
+hacer import de Pipeline
+ejecutar Pipeline.initial_go
+ejecutar pipeline.run_online(para, 600, 30, 10)
