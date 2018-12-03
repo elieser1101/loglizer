@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from logparser.logparser.Drain import Drain
 from logparser.logparser.LogSig import LogSig
 from logparser.logparser.LenMa import LenMa
+from pipeline.parser_indexer import ParsedFile, ParsedLog, Indexer
 #analizer algorithm imports
 from utils import data_loader as data_loader
 from models import mining_invariants as mi
@@ -238,7 +239,7 @@ class Loglizer:
 class Pipeline:
     def __init__(self, parser_algorithm='drain', input_dir = None, parser_output_dir = None, log_file = None,
                  parser_regex = None, feature_extractor='fixed_window', log_analizer_algorithm='mining_invariants',
-                 data_type='event_based', ):
+                 data_type='event_based', elasticsearch_index_name='deepia'):
         #TODO:es necesario cargarle estos atributos a pipeline o simplemente se los paso a la calse que instancia??
         self.parser_algorithm = parser_algorithm
         self.input_dir = input_dir
@@ -261,6 +262,8 @@ class Pipeline:
         self.predictions = None
         self.anomalies = None
         self.last_log_lines_len = None
+        self.elasticsearch_index_name = elasticsearch_index_name
+        self.indexer = Indexer(self.elasticsearch_index_name)
 
     def execute(self, *args):#TODO:creo que solo funciona con los casos default del parser, pq si le paso algo rompera lo que recibe el log_analizer
         self.parser.execute()
@@ -283,6 +286,10 @@ class Pipeline:
         log_name_path = self.parser.input_dir + self.parser.log_file
         self.last_log_lines_len = self.get_file_lines_len(log_name_path)
         self.parser.execute()
+        structured_log_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.log_structured.csv'
+        parsed_file = ParsedFile(structured_log_path)
+        #TODO: deberia validar algo antes de index??borrar el indice que ya existe?o solo se actualiza y ya?
+        self.indexer.index_file(parsed_file)
 
     def create_file_map(self):
         structured_log_path = self.log_analizer.input_dir + self.log_analizer.log_seq.split('.log')[0] + '.log_structured.csv'
@@ -303,8 +310,24 @@ class Pipeline:
         self.invar_dict =  self.log_analizer.find_invariants(para, self.event_count_matrix)
         return self.invar_dict
 
+    #TODO:donde deberia ir este metdoo???
+    def set_doc_as_anomaly(self, anomaly_event):
+        for anomaly_log_line_value in anomaly_event.log_lines_list:
+            update_elems = dict()
+            update_elems['doc'] = dict()
+            update_elems['doc']['anomaly'] = True
+            update_elems['doc']['anomaly_vector_id'] = anomaly_event.row_index
+            self.indexer.update_log(update_elems, anomaly_log_line_value)
+
+    #TODO:donde deberia ir este metdoo???
+    def set_anomalies_in_elasticsearch(self):
+        for anomaly_row in self.anomalies:
+            for anomaly_event in anomaly_row.anomaly_events:
+                self.set_doc_as_anomaly(anomaly_event)
+
     def get_anomalies(self, para):
         self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
+        self.set_anomalies_in_elasticsearch()
         return self.predictions, self.anomalies
 
     def parse_and_extract_features(self, para, delete_window_memmory=False):
@@ -317,7 +340,7 @@ class Pipeline:
         self.create_file_map()
         self.event_count_matrix = self.get_event_count_matrix(para)
         self.invar_dict = self.find_invariants( para)
-        self.predictions, self.anomalies = self.log_analizer.get_anomalies(para, self.event_count_matrix, self.invar_dict)
+        self.predictions, self.anomalies = self.get_anomalies(para)
 
     def validate_change(self):
         log_name_path = self.parser.input_dir + self.parser.log_file

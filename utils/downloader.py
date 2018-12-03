@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+__author__ = 'Ricardo Capuz'
 # Import Elasticsearch package
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
