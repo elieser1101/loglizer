@@ -306,7 +306,7 @@ class Pipeline:
         return self.event_count_matrix
 
     def find_invariants(self, para):
-        print(self.event_count_matrix.shape)
+        print('event count matrix shape', self.event_count_matrix.shape)
         self.invar_dict =  self.log_analizer.find_invariants(para, self.event_count_matrix)
         return self.invar_dict
 
@@ -317,7 +317,9 @@ class Pipeline:
             update_elems['doc'] = dict()
             update_elems['doc']['anomaly'] = True
             update_elems['doc']['anomaly_vector_id'] = anomaly_event.row_index
-            self.indexer.update_log(update_elems, anomaly_log_line_value)
+            #TODO:porque hay vacios???
+            if anomaly_log_line_value != '':
+                self.indexer.update_log(update_elems, anomaly_log_line_value)
 
     #TODO:donde deberia ir este metdoo???
     def set_anomalies_in_elasticsearch(self):
@@ -352,11 +354,7 @@ class Pipeline:
     #primeramente se corre a mano para validar que funciona la logica
     def deepslash(self, para):
         if self.validate_change():
-            print('####')
-            print('#######')
-            print('#########')
-            print('############')
-            print('logica de inferencia activa, cambio el log')
+            print('\n\nse detecto cambio en el log, iniciando inferencia')
             self.parse_and_extract_features(para, True)
             self.predictions, self.anomalies = self.get_anomalies(para)
 
@@ -372,14 +370,9 @@ class Pipeline:
             if now - last_invar_t > invar_window:
                 last_invar_t = now
                 self.invar_dict = self.find_invariants(para)
-                print('####')
-                print('#######')
-                print('#########')
-                print('############')
-                print('calcular invar', now)
+                print('\n\nse alcanzo el tiempo definido para validez de invariantes, iniciando busqueda de invariantes', now)
             if now - las_inference_t > inference_window:
                 las_inference_t = now
-                print('hacer inferencia', now, '<<')
                 self.deepslash(para)
             # print(now)
             now = datetime.now()

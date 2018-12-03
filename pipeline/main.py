@@ -1,40 +1,27 @@
-import sys
-import os
 import time
+import sys
 
-from pipeline import Pipeline
-os.chdir('/loglizer')
-sys.path.append('/loglizer')#drain __init__.py
-PYTHONPATH= '/loglizer'
+repo_path = '/home/us1/git/loglizer'
+sys.path.append(repo_path)#logsig __init__.py
+sys.path.append(repo_path + '/logparser/logparser/LogSig')#logsig __init__.py
+sys.path.append(repo_path + '/logparser/logparser/LenMa/')#for lenma __init__.py
+sys.path.append(repo_path + '/logparser/logparser/LenMa/templateminer')#for lenma
+from pipeline.pipeline import Pipeline
 
-
-
-
-file = open('/dayco_log.log', 'r')
-lines = file.readlines()
-file.close()
-file = open('/dayco_log.log', 'a')
-file.write(lines[-1][:-1])
-file.close()
-file = open('/dayco_log.log', 'r')
-lines = file.readlines()
-file.close()
-
-input_dir  = '/'  # The input directory of log file
-output_dir = '/'  # The output directory of parsing results
+input_dir  = repo_path +'/'  # The input directory of log file
+output_dir = repo_path + '/'  # The output directory of parsing results
 log_file   = 'dayco_log.log'  # The input log file name
-#log_format = '<Label> <Timestamp> <Date> <Node> <Time> <NodeRepeat> <Type> <Component> <Level> <Content>'#BGL
 log_format = '<smonth> <sday> <shour> <ip> <id> <id2> <month> <day> <hour> <city> <type> <Content>'#dayco/rsyslog
 
 pipeline = Pipeline(parser_algorithm='drain', input_dir = input_dir, parser_output_dir = output_dir, log_file = log_file,
 parser_regex = log_format, feature_extractor='fixed_window', log_analizer_algorithm='mining_invariants',
-data_type='time_based')
+data_type='time_based', elasticsearch_index_name='deepia')
 
 para = {
-'path':'/',                 # directory for input data
+'path':repo_path + '/',                 # directory for input data
 'log_file_name':'dayco_log.log',           # filename for log data file
 'log_event_mapping':'dayco_log.logTemplateMap.csv',   # filename for log-event mapping. A list of event index, where each row represents a log
-'save_path': '../time_windows/',             # dir for saving sliding window data files to avoid splitting
+'save_path': './time_windows/',             # dir for saving sliding window data files to avoid splitting
 #'select_column':[0,4],                      # select the corresponding columns (label and time) in the raw log file
 'select_column':[0,1,2],                      # select the corresponding columns (label and time) in the raw log file, en caso de depia no nos intersa la columna label
 'window_size':3, #3                           # time window (unit: hour)
@@ -45,13 +32,8 @@ para = {
 'stop_invar_num':3                          # stop if the invariant length is larger than stop_invar_num. None if not given
 }
 start = time.time()
-#event_count_matrix = pipeline.log_analizer.get_event_count_matrix(para)
-#invar_dict = pipeline.log_analizer.find_invariants(para, event_count_matrix)
-#predictions, anomalies = pipeline.log_analizer.get_anomalies(para, event_count_matrix, invar_dict)
 pipeline.initial_go(para)
 end = time.time()
-print('total execution time in seconds?',end - start)
+print('\n total execution time in seconds?',end - start)
 
-# head /rocore1.log
-# print('******')
-# head /rocore2.log
+pipeline.run_online(para, 600, 30, 10)

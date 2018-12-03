@@ -15,7 +15,7 @@ def create_file_from_elastic(index, source_log, result_log_path):
     file.close()
 
 if __name__ == '__main__':
-    index = "filebeat-6.5.1-2018.12.02"
+    index = "filebeat-6.5.1-2018.12.03"
     source_log = "/var/log/rocore2.log"
     result_log_path = '/home/us1/git/loglizer' + "/dayco_log.log"
     create_file_from_elastic(index, source_log, result_log_path)

@@ -1,4 +1,6 @@
+NOTA:actualmente simulamos la entrada de logs al rocore.log porque no estamos conectados a un servidor real
 correr un cronjob para actualizar log a analizar
+NOTA: revisar en dowloader apuntar al indice de filebeat correcto
 crontab -e
 */1 * * * * /home/us1/git/mammut-transducer-ktt/lab/env/bin/python /home/us1/git/loglizer/utils/downloader.py
 

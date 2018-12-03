@@ -58,7 +58,7 @@ def compute_eigenvector(event_count_matrix):
 		if np.fabs(i) < 1e-6:
 			count_zero += 1
 	if count_zero != 0:
-		print("0 exits and discard the following vector: ")
+		#print("0 exits and discard the following vector: ")
 		FLAG_contain_zero=True
 	min_vec = min_vec.T
 	return min_vec, FLAG_contain_zero
@@ -82,7 +82,7 @@ def check_invar_validity(para, event_count_matrix, selected_columns):
 	sub_matrix = event_count_matrix[:, selected_columns]
 	inst_num = event_count_matrix.shape[0]
 	validity = False
-	print ('selected matrix columns are', selected_columns)
+	#print ('selected matrix columns are', selected_columns)
 	min_theta, FLAG_contain_zero = compute_eigenvector(sub_matrix)
 	abs_min_theta = [np.fabs(it) for it in min_theta]
 	if FLAG_contain_zero:
@@ -103,7 +103,7 @@ def check_invar_validity(para, event_count_matrix, selected_columns):
 					count_zero += 1
 			if count_zero >= para['threshold'] * inst_num:
 				validity = True
-				print('A valid invariant is found and the corresponding columns are ',scaled_theta, selected_columns)
+				#print('A valid invariant is found and the corresponding columns are ',scaled_theta, selected_columns)
 				break
 		return validity, scaled_theta
 
@@ -321,7 +321,7 @@ def deepia_evaluate(event_count_matrix, invar_dict, log_template, structured_log
 	Returns:
 	--------
 	"""
-	print('log template path is ' + log_template)
+	#print('log template path is ' + log_template)
 	headers = pd.read_csv(log_template)
 	headers  # .keys()
 	struct_log_df = pd.read_csv(structured_log_path)
@@ -334,8 +334,8 @@ def deepia_evaluate(event_count_matrix, invar_dict, log_template, structured_log
 	for key in invar_dict:
 		valid_col_list.append(list(key))
 		valid_invar_list.append(list(invar_dict[key]))
-	print(valid_col_list)
-	print(valid_invar_list)
+	#print(valid_col_list)
+	#print(valid_invar_list)
 
 	prediction = []
 	anomalies_rows = list()
@@ -352,28 +352,28 @@ def deepia_evaluate(event_count_matrix, invar_dict, log_template, structured_log
 			# print('col',j, c)
 			# print('mult val', valid_invar_list[i][j], row[c])
 			if sum_of_invar != 0:
-				print('*******8anomaly*****************')
+				print('\n****************anomaly*****************')
 				print('index, row', row_index, row)
 				print('cols', cols, valid_invar_list[i])  # cols son las filas de la matriz que definen el invariante
 				# print('eventid',name_index.loc[row_index][0])#TODO:name index esta definido mas adelante
-				print('\n invariant', cols)  # TODO:esto es el invariante, pero que es lo que veo yo como anomaliaA??
+				#print('\n invariant', cols)  # TODO:esto es el invariante, pero que es lo que veo yo como anomaliaA??
 				for j in cols:
 					event_template = headers['EventTemplate'][j]
-					print('>>>',
-						  event_template)  # TODO:header.keys es el dataframe que se define mas abajo
+					print('>>>',event_template)  # TODO:header.keys es el dataframe que se define mas abajo
 					start_window_index = windows_df.iloc[row_index][0]
 					end_window_index = windows_df.iloc[row_index][1]
-					print('start, end', start_window_index, end_window_index)
+					#print('start, end', start_window_index, end_window_index)
 					struct_dataframe_window = struct_log_df[start_window_index:end_window_index]
 					result_matching_events_df = struct_dataframe_window[
 						struct_dataframe_window['EventTemplate'] == event_template]
-					print('len de eventos en window', len(result_matching_events_df))
+					#print('len de eventos en window', len(result_matching_events_df))
 					result_matching_events_list = list()
 					if len(result_matching_events_df):
 						result_matching_events_list = result_matching_events_df.to_string(header=False,
 																						  index=False,
 																						  index_names=False).split('\n')
 
+						print('\nPOSIBLE ANOMALIE LOGS :')
 						for log_line in result_matching_events_list:
 							print(log_line)
 					anomaly_event = AnomalyEvent(event_template, row_index, row, cols, valid_invar_list[i],
